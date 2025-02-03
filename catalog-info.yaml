@@ -1,0 +1,15 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: test-argo-link
+  links:
+    - url: https://34.30.205.164:30000
+      title: App
+      icon: dashboard
+  annotations:
+    argocd/app-name: monitoring
+  description: test-argo-link running on Kubernetes
+spec:
+  type: service
+  owner: user:guest
+  lifecycle: experimental
