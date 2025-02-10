@@ -16,12 +16,9 @@ jobs:
     - name: Print the JSON input passed from third-party app
       run: |
         # Capture the JSON input
-        JSON_INPUT="${{ github.event.inputs.json_input }}"
-
-        # Print the received JSON input
         echo "Received JSON input:"
-        echo "$JSON_INPUT"
+        echo "${{ github.event.inputs.json_input }}"
 
-        # Optionally, if you want to format the JSON nicely
+        # Optionally, parse it (debugging)
         echo "Formatted JSON input:"
-        echo "$JSON_INPUT" | jq .
+        echo "${{ github.event.inputs.json_input }}" | jq . || echo "Invalid JSON input"
