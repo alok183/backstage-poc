@@ -1,0 +1,27 @@
+name: Print JSON Input from Third-Party App
+
+on:
+  workflow_dispatch:
+    inputs:
+      json_input:
+        description: 'JSON input from third-party app'
+        required: true
+        default: '{}'
+
+jobs:
+  print-json-input:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Print the JSON input passed from third-party app
+      run: |
+        # Capture the JSON input
+        JSON_INPUT="${{ github.event.inputs.json_input }}"
+
+        # Print the received JSON input
+        echo "Received JSON input:"
+        echo "$JSON_INPUT"
+
+        # Optionally, if you want to format the JSON nicely
+        echo "Formatted JSON input:"
+        echo "$JSON_INPUT" | jq .
