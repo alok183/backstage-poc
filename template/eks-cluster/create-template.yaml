@@ -72,7 +72,7 @@ spec:
       name: Transform JSON with JSONata
       action: roadiehq:utils:jsonata
       input:
-        expression: `$`
+        expression: '$'
         data: ${{ steps.generate-json.output.content }}
 
     - id: call-api
