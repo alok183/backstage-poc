@@ -55,30 +55,18 @@ spec:
 
   steps:
     - id: generate-json
-      name: Generate JSON Payload
-      action: fetch:plain
+      name: Generate JSON
+      action: fetch:template
       input:
-        url: "data:text/plain;charset=utf-8,{{"
-        method: GET
-        body: |
-          {
-            "EnvSize": "${{ parameters.envSize }}",
-            "environmentName": "${{ parameters.environmentName }}",
-            "tags": [
-              { "costCenter": "${{ parameters.costCenter }}" },
-              { "createdBy": "${{ parameters.createdBy }}" }
-            ],
-            "access": {
-              "roles": {
-                "admin": "${{ parameters.adminEmail }}"
-              }
-            },
-            "provider": {
-              "location": "${{ parameters.location }}",
-              "subscription": "${{ parameters.subscription }}",
-              "type": "azure"
-            }
-          }
+        url: ./content/api-payload.json
+        values:
+          envSize: ${{ parameters.envSize }}
+          environmentName: ${{ parameters.environmentName }}
+          costCenter: ${{ parameters.costCenter }}
+          createdBy: ${{ parameters.createdBy }}
+          adminEmail: ${{ parameters.adminEmail }}
+          location: ${{ parameters.location }}
+          subscription: ${{ parameters.subscription }}
 
     - id: call-api
       name: Call API
@@ -88,9 +76,9 @@ spec:
         path: "/proxy/environment"
         headers:
           Content-Type: application/json
-        body: ${{ steps.generate-json.output }}
+        body: ${{ steps.generate-json.output.content }}
 
   output:
     links:
       - title: API Response
-        url: "${{ parameters.apiUrl }}"
+        url: ${{ parameters.apiUrl }}
