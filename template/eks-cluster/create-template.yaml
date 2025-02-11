@@ -91,7 +91,7 @@ spec:
       action: http:backstage:request
       input:
         method: POST
-        path: ${{ parameters.apiUrl }}
+        path: "proxy/environment"
         headers:
           Content-Type: application/json
         body: ${{ steps.generate-json.output }}
