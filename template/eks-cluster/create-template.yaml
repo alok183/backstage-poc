@@ -68,21 +68,21 @@ spec:
           location: ${{ parameters.location }}
           subscription: ${{ parameters.subscription }}
 
-    - id: parse-json
-      name: Parse JSON
-      action: roadiehq:utils:json:parse
+    - id: serialize-json
+      name: Convert JSON String to Object
+      action: roadiehq:utils:serialize:json
       input:
-        content: ${{ steps.generate-json.output.content }}
+        data: ${{ steps.generate-json.output.content }}
 
     - id: call-api
       name: Call API
       action: http:backstage:request
       input:
         method: POST
-        path: ${{ parameters.apiUrl }}
+        path: "proxy/environment"
         headers:
           Content-Type: application/json
-        body: ${{ steps.parse-json.output }}
+        body: ${{ steps.serialize-json.output }}
 
   output:
     links:
