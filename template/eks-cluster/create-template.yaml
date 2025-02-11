@@ -16,7 +16,7 @@ spec:
         apiUrl:
           title: API URL
           type: string
-          description: The API endpoint to send the request to
+          description: The external API endpoint to send the request to
         envSize:
           title: Environment Size
           type: string
@@ -56,10 +56,9 @@ spec:
   steps:
     - id: generate-json
       name: Generate JSON
-      action: roadiehq:utils:fs:write
+      action: scaffolder:fetch:template
       input:
-        path: ./generated-payload.json        
-        content: |
+        template: |
           {
             "EnvSize": "${{ parameters.envSize }}",
             "environmentName": "${{ parameters.environmentName }}",
@@ -78,16 +77,17 @@ spec:
               "type": "azure"
             }
           }
+        destination: generated-json
 
     - id: call-api
-      name: Call API
-      action: http:backstage:request
+      name: Call External API
+      action: http:request
       input:
         method: POST
-        path: "${{ parameters.apiUrl }}"
+        url: "${{ parameters.apiUrl }}" # Calls the external API
         headers:
           Content-Type: application/json
-        bodyFromFile: ./generated-payload.json
+        body: ${{ steps.generate-json.output.content }}
 
   output:
     links:
