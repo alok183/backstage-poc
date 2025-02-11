@@ -58,28 +58,26 @@ spec:
       name: Generate JSON
       action: fs:write
       input:
-        targetPath: ./generated-payload.json
-        template:
-          format: json
-          content: |
-            {
-              "EnvSize": "${{ parameters.envSize }}",
-              "environmentName": "${{ parameters.environmentName }}",
-              "tags": [
-                { "costCenter": "${{ parameters.costCenter }}" },
-                { "createdBy": "${{ parameters.createdBy }}" }
-              ],
-              "access": {
-                "roles": {
-                  "admin": "${{ parameters.adminEmail }}"
-                }
-              },
-              "provider": {
-                "location": "${{ parameters.location }}",
-                "subscription": "${{ parameters.subscription }}",
-                "type": "azure"
+        path: ./generated-payload.json        
+        content: |
+          {
+            "EnvSize": "${{ parameters.envSize }}",
+            "environmentName": "${{ parameters.environmentName }}",
+            "tags": [
+              { "costCenter": "${{ parameters.costCenter }}" },
+              { "createdBy": "${{ parameters.createdBy }}" }
+            ],
+            "access": {
+              "roles": {
+                "admin": "${{ parameters.adminEmail }}"
               }
+            },
+            "provider": {
+              "location": "${{ parameters.location }}",
+              "subscription": "${{ parameters.subscription }}",
+              "type": "azure"
             }
+          }
 
     - id: call-api
       name: Call API
