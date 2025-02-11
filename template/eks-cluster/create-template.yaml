@@ -1,0 +1,89 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: eks-cluster
+  title: New EKS Cluster
+  description: Deploy a New EKS Cluster using Crossplane
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: Environment Details
+      properties:
+        envSize:
+          type: string
+          description: "The environment size for the EKS cluster"
+          default: "java-small-env"
+        environmentName:
+          type: string
+          description: "The name of the environment"
+          default: "aks-test"
+        location:
+          type: string
+          description: "The region where the provider is located"
+          default: "us-east-1"
+        providerType:
+          type: string
+          description: "The cloud provider type"
+          default: "azure"
+        subscription:
+          type: string
+          description: "The subscription email for Azure"
+          default: "testuser2@test.com"
+    - title: Tags
+      properties:
+        costCenter:
+          type: string
+          description: "The cost center tag"
+          default: "Delivery"
+        createdBy:
+          type: string
+          description: "The creator tag"
+          default: "Delivery"
+    - title: Access Configuration
+      properties:
+        adminEmail:
+          type: string
+          description: "Email of the admin user"
+          default: "testuser1@test.com"
+    - title: API Call Configuration
+      properties:
+        apiUrl:
+          type: string
+          description: "The public API endpoint to make the request"
+          default: "http://localhost:8080/environment"
+  
+  steps:
+    - id: generate-json
+      name: Generate JSON Payload
+      action: backstage:run
+      input:
+        jsonBody: |
+          {
+            "EnvSize": "{{ parameters.envSize }}",
+            "environmentName": "{{ parameters.environmentName }}",
+            "tags": [
+              { "costCenter": "{{ parameters.costCenter }}" },
+              { "createdBy": "{{ parameters.createdBy }}" }
+            ],
+            "access": {
+              "roles": {
+                "admin": "{{ parameters.adminEmail }}"
+              }
+            },
+            "provider": {
+              "location": "{{ parameters.location }}",
+              "subscription": "{{ parameters.subscription }}",
+              "type": "{{ parameters.providerType }}"
+            }
+          }
+
+    - id: call-api
+      name: Call API with JSON Body
+      action: backstage:callApi
+      input:
+        url: "{{ parameters.apiUrl }}"
+        method: POST
+        body: "{{ steps.generate-json.output.jsonBody }}"
+        headers:
+          Content-Type: application/json
