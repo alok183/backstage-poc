@@ -1,102 +1,95 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: eks-cluster
-  title: New EKS Cluster
-  description: Deploy a New EKS Cluster using Crossplane
+  name: json-api-caller
+  title: JSON API Caller Template
+  description: Generates JSON from user inputs and makes a POST request
 spec:
-  owner: user:guest
+  owner: user-team
   type: service
+
   parameters:
-    - title: Environment Details
-      properties:
-        envSize:
-          type: string
-          description: "The environment size for the EKS cluster"
-          default: "java-small-env"
-        environmentName:
-          type: string
-          description: "The name of the environment"
-          default: "aks-test"
-        location:
-          type: string
-          description: "The region where the provider is located"
-          default: "us-east-1"
-        providerType:
-          type: string
-          description: "The cloud provider type"
-          default: "azure"
-        subscription:
-          type: string
-          description: "The subscription email for Azure"
-          default: "testuser2@test.com"
-    - title: Tags
-      properties:
-        costCenter:
-          type: string
-          description: "The cost center tag"
-          default: "Delivery"
-        createdBy:
-          type: string
-          description: "The creator tag"
-          default: "Delivery"
-    - title: Access Configuration
-      properties:
-        adminEmail:
-          type: string
-          description: "Email of the admin user"
-          default: "testuser1@test.com"
-    - title: API Call Configuration
+    - title: API Request Details
+      required:
+        - apiUrl
+        - envSize
+        - environmentName
+        - costCenter
+        - createdBy
+        - adminEmail
+        - location
+        - subscription
       properties:
         apiUrl:
+          title: API URL
           type: string
-          description: "The public API endpoint to make the request"
-          default: "http://localhost:8080/environment"
+          description: The API endpoint to send the request to
+        envSize:
+          title: Environment Size
+          type: string
+          description: The size of the environment
+        environmentName:
+          title: Environment Name
+          type: string
+          description: The name of the environment
+        costCenter:
+          title: Cost Center
+          type: string
+          description: The cost center tag
+        createdBy:
+          title: Created By
+          type: string
+          description: The creator tag
+        adminEmail:
+          title: Admin Email
+          type: string
+          description: Email of the admin user
+        location:
+          title: Location
+          type: string
+          description: Cloud provider location
+        subscription:
+          title: Subscription
+          type: string
+          description: Subscription owner email
 
   steps:
     - id: generate-json
-      name: Generate JSON Payload
-      action: fs:write  
+      name: Generate JSON
+      action: roadiehq:utils:fs:write
       input:
-        path: ./eks-cluster.json
+        path: ./generated-payload.json
         content: |
           {
-            "EnvSize": "{{ parameters.envSize }}",
-            "environmentName": "{{ parameters.environmentName }}",
+            "EnvSize": "${{ parameters.envSize }}",
+            "environmentName": "${{ parameters.environmentName }}",
             "tags": [
-              { "costCenter": "{{ parameters.costCenter }}" },
-              { "createdBy": "{{ parameters.createdBy }}" }
+              { "costCenter": "${{ parameters.costCenter }}" },
+              { "createdBy": "${{ parameters.createdBy }}" }
             ],
             "access": {
               "roles": {
-                "admin": "{{ parameters.adminEmail }}"
+                "admin": "${{ parameters.adminEmail }}"
               }
             },
             "provider": {
-              "location": "{{ parameters.location }}",
-              "subscription": "{{ parameters.subscription }}",
-              "type": "{{ parameters.providerType }}"
+              "location": "${{ parameters.location }}",
+              "subscription": "${{ parameters.subscription }}",
+              "type": "azure"
             }
           }
 
     - id: call-api
-      name: Call API with JSON Body
-      action: http:request 
+      name: Call API
+      action: http:backstage:request
       input:
-        url: "{{ parameters.apiUrl }}"
         method: POST
+        url: "${{ parameters.apiUrl }}"
         headers:
           Content-Type: application/json
-        body:
-          EnvSize: "{{ parameters.envSize }}"
-          environmentName: "{{ parameters.environmentName }}"
-          tags:
-            - costCenter: "{{ parameters.costCenter }}"
-            - createdBy: "{{ parameters.createdBy }}"
-          access:
-            roles:
-              admin: "{{ parameters.adminEmail }}"
-          provider:
-            location: "{{ parameters.location }}"
-            subscription: "{{ parameters.subscription }}"
-            type: "{{ parameters.providerType }}"
+        bodyFromFile: ./generated-payload.json
+
+  output:
+    links:
+      - title: API Response
+        url: "${{ parameters.apiUrl }}"
