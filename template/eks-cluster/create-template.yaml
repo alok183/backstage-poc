@@ -94,7 +94,7 @@ spec:
         path: "proxy/environment"
         headers:
           Content-Type: application/json
-        body: ${{ steps.generate-json.output }}
+        body: ${{ steps.generate-json.output.result }}
 
   output:
     links:
