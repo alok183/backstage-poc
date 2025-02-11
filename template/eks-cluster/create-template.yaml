@@ -56,10 +56,28 @@ spec:
   steps:
     - id: generate-json
       name: Generate JSON
-      action: fetch:template
+      action: roadiehq:utils:jsonata
       input:
-        url: ./content/api-payload.json
-        values:
+        expression: >
+          {
+            "EnvSize": $envSize,
+            "environmentName": $environmentName,
+            "tags": [
+              { "costCenter": $costCenter },
+              { "createdBy": $createdBy }
+            ],
+            "access": {
+              "roles": {
+                "admin": $adminEmail
+              }
+            },
+            "provider": {
+              "location": $location,
+              "subscription": $subscription,
+              "type": "azure"
+            }
+          }
+        data:
           envSize: ${{ parameters.envSize }}
           environmentName: ${{ parameters.environmentName }}
           costCenter: ${{ parameters.costCenter }}
@@ -68,22 +86,15 @@ spec:
           location: ${{ parameters.location }}
           subscription: ${{ parameters.subscription }}
 
-    - id: transform-json
-      name: Transform JSON with JSONata
-      action: roadiehq:utils:jsonata
-      input:
-        expression: '$'
-        data: ${{ steps.generate-json.output.content }}
-
     - id: call-api
       name: Call External API
       action: http:backstage:request
       input:
         method: POST
-        path: "proxy/environment"
+        path: ${{ parameters.apiUrl }}
         headers:
           Content-Type: application/json
-        body: ${{ steps.transform-json.output }}
+        body: ${{ steps.generate-json.output }}
 
   output:
     links:
