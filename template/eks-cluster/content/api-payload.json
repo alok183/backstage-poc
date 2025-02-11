@@ -1,0 +1,18 @@
+{
+  "EnvSize": "{{ envSize }}",
+  "environmentName": "{{ environmentName }}",
+  "tags": [
+    { "costCenter": "{{ costCenter }}" },
+    { "createdBy": "{{ createdBy }}" }
+  ],
+  "access": {
+    "roles": {
+      "admin": "{{ adminEmail }}"
+    }
+  },
+  "provider": {
+    "location": "{{ location }}",
+    "subscription": "{{ subscription }}",
+    "type": "azure"
+  }
+}
