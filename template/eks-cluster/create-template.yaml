@@ -56,7 +56,7 @@ spec:
   steps:
     - id: generate-json
       name: Generate JSON
-      action: scaffolder:fetch:template
+      action: fetch:template
       input:
         template: |
           {
