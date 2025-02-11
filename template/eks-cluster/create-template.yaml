@@ -58,15 +58,28 @@ spec:
       name: Generate JSON
       action: fetch:template
       input:
-        url: ./template-files/json-payload.json
-        values:
-          EnvSize: ${{ parameters.envSize }}
-          environmentName: ${{ parameters.environmentName }}
-          costCenter: ${{ parameters.costCenter }}
-          createdBy: ${{ parameters.createdBy }}
-          adminEmail: ${{ parameters.adminEmail }}
-          location: ${{ parameters.location }}
-          subscription: ${{ parameters.subscription }}
+        targetPath: ./generated-payload.json
+        template:
+          format: json
+          content: |
+            {
+              "EnvSize": "${{ parameters.envSize }}",
+              "environmentName": "${{ parameters.environmentName }}",
+              "tags": [
+                { "costCenter": "${{ parameters.costCenter }}" },
+                { "createdBy": "${{ parameters.createdBy }}" }
+              ],
+              "access": {
+                "roles": {
+                  "admin": "${{ parameters.adminEmail }}"
+                }
+              },
+              "provider": {
+                "location": "${{ parameters.location }}",
+                "subscription": "${{ parameters.subscription }}",
+                "type": "azure"
+              }
+            }
 
     - id: call-api
       name: Call API
@@ -76,7 +89,7 @@ spec:
         url: "${{ parameters.apiUrl }}"
         headers:
           Content-Type: application/json
-        bodyFromFile: ./template-files/json-payload.json
+        bodyFromFile: ./generated-payload.json
 
   output:
     links:
