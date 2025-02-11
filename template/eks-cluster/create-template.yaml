@@ -54,55 +54,29 @@ spec:
           default: testuser2@test.com
 
   steps:
-  - id: generate-json
-    name: Generate JSON
-    action: roadiehq:utils:jsonata
-    input:
-      expression: >
-        {
-          "EnvSize": $envSize,
-          "environmentName": $environmentName,
-          "tags": [
-            { "costCenter": $costCenter },
-            { "createdBy": $createdBy }
-          ],
-          "access": {
-            "roles": {
-              "admin": $adminEmail
-            }
-          },
-          "provider": {
-            "location": $location,
-            "subscription": $subscription,
-            "type": "azure"
-          }
-        }
-      data:
-        envSize: ${{ parameters.envSize }}
-        environmentName: ${{ parameters.environmentName }}
-        costCenter: ${{ parameters.costCenter }}
-        createdBy: ${{ parameters.createdBy }}
-        adminEmail: ${{ parameters.adminEmail }}
-        location: ${{ parameters.location }}
-        subscription: ${{ parameters.subscription }}
+    - id: generate-json
+      name: Generate JSON
+      action: fetch:template
+      input:
+        url: ./content/api-payload.json  # ✅ Read JSON from a file
+        values:
+          EnvSize: ${{ parameters.envSize }}
+          environmentName: ${{ parameters.environmentName }}
+          costCenter: ${{ parameters.costCenter }}
+          createdBy: ${{ parameters.createdBy }}
+          adminEmail: ${{ parameters.adminEmail }}
+          location: ${{ parameters.location }}
+          subscription: ${{ parameters.subscription }}
 
-  - id: convert-to-json
-    name: Convert to JSON
-    action: roadiehq:utils:jsonata
-    input:
-      expression: $  # ✅ Identity function (no transformation, ensures output is a JSON object)
-      data: ${{ steps.generate-json.output.result }}
-
-  - id: call-api
-    name: Call External API
-    action: http:backstage:request
-    input:
-      method: POST
-      path: "/proxy/environment"
-      headers:
-        Content-Type: application/json
-      body: ${{ steps.convert-to-json.output.result }}  # ✅ Ensured JSON object
-
+    - id: call-api
+      name: Call External API
+      action: http:backstage:request
+      input:
+        method: POST
+        path: "/proxy/environment"
+        headers:
+          Content-Type: application/json
+        body: ${{ steps.generate-json.output }}  # ✅ Now it's a valid object
 
   output:
     links:
