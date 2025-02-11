@@ -84,7 +84,7 @@ spec:
       action: http:backstage:request
       input:
         method: POST
-        url: "${{ parameters.apiUrl }}"
+        path: "${{ parameters.apiUrl }}"
         headers:
           Content-Type: application/json
         bodyFromFile: ./generated-payload.json
