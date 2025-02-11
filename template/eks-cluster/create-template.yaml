@@ -92,7 +92,7 @@ spec:
       action: http:backstage:request
       input:
         method: POST
-        path: "/environment"
+        path: "/deployhub/environment"
         headers:
           Content-Type: application/json
         body: ${{ steps.parsefile.output.content }}
