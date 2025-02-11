@@ -68,21 +68,22 @@ spec:
           location: ${{ parameters.location }}
           subscription: ${{ parameters.subscription }}
 
-    - id: serialize-json
-      name: Convert JSON String to Object
-      action: roadiehq:utils:serialize:json
+    - id: transform-json
+      name: Transform JSON with JSONata
+      action: roadiehq:utils:jsonata
       input:
+        expression: `$`
         data: ${{ steps.generate-json.output.content }}
 
     - id: call-api
-      name: Call API
+      name: Call External API
       action: http:backstage:request
       input:
         method: POST
         path: "proxy/environment"
         headers:
           Content-Type: application/json
-        body: ${{ steps.serialize-json.output }}
+        body: ${{ steps.transform-json.output }}
 
   output:
     links:
