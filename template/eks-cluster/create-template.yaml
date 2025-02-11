@@ -52,13 +52,14 @@ spec:
           type: string
           description: "The public API endpoint to make the request"
           default: "http://localhost:8080/environment"
-  
+
   steps:
     - id: generate-json
       name: Generate JSON Payload
-      action: backstage:publish
+      action: fs:write  
       input:
-        jsonBody: |
+        path: ./eks-cluster.json
+        content: |
           {
             "EnvSize": "{{ parameters.envSize }}",
             "environmentName": "{{ parameters.environmentName }}",
@@ -80,10 +81,22 @@ spec:
 
     - id: call-api
       name: Call API with JSON Body
-      action: backstage:callApi
+      action: http:request 
       input:
         url: "{{ parameters.apiUrl }}"
         method: POST
-        body: "{{ steps.generate-json.output.jsonBody }}"
         headers:
           Content-Type: application/json
+        body:
+          EnvSize: "{{ parameters.envSize }}"
+          environmentName: "{{ parameters.environmentName }}"
+          tags:
+            - costCenter: "{{ parameters.costCenter }}"
+            - createdBy: "{{ parameters.createdBy }}"
+          access:
+            roles:
+              admin: "{{ parameters.adminEmail }}"
+          provider:
+            location: "{{ parameters.location }}"
+            subscription: "{{ parameters.subscription }}"
+            type: "{{ parameters.providerType }}"
