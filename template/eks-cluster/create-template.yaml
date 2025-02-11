@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: json-api-caller
   title: JSON API Caller Template
-  description: Generates JSON from user inputs and makes a POST request
+  description: Generates and saves JSON, then makes a POST request
 spec:
   owner: user-team
   type: service
@@ -56,17 +56,36 @@ spec:
   steps:
     - id: generate-json
       name: Generate JSON
-      action: fetch:template
+      action: roadiehq:utils:fs:write
       input:
-        url: ./content/api-payload.json  # ✅ Read JSON from a file
-        values:
-          EnvSize: ${{ parameters.envSize }}
-          environmentName: ${{ parameters.environmentName }}
-          costCenter: ${{ parameters.costCenter }}
-          createdBy: ${{ parameters.createdBy }}
-          adminEmail: ${{ parameters.adminEmail }}
-          location: ${{ parameters.location }}
-          subscription: ${{ parameters.subscription }}
+        path: ./templates/api-payload.json
+        content: |
+          {
+            "EnvSize": "${{ parameters.envSize }}",
+            "environmentName": "${{ parameters.environmentName }}",
+            "tags": [
+              { "costCenter": "${{ parameters.costCenter }}" },
+              { "createdBy": "${{ parameters.createdBy }}" }
+            ],
+            "access": {
+              "roles": {
+                "admin": "${{ parameters.adminEmail }}"
+              }
+            },
+            "provider": {
+              "location": "${{ parameters.location }}",
+              "subscription": "${{ parameters.subscription }}",
+              "type": "azure"
+            }
+          }
+        encoding: utf-8
+
+    - id: parsefile
+      name: Parse JSON File
+      action: roadiehq:utils:fs:parse
+      input:
+        path: ./templates/api-payload.json
+        parser: json
 
     - id: call-api
       name: Call External API
@@ -76,7 +95,7 @@ spec:
         path: "/proxy/environment"
         headers:
           Content-Type: application/json
-        body: ${{ steps.generate-json.output }}  # ✅ Now it's a valid object
+        body: ${{ steps.parsefile.output.content }}
 
   output:
     links:
