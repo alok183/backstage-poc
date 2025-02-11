@@ -56,28 +56,17 @@ spec:
   steps:
     - id: generate-json
       name: Generate JSON
-      action: roadiehq:utils:fs:write
+      action: fetch:template
       input:
-        path: ./generated-payload.json
-        content: |
-          {
-            "EnvSize": "${{ parameters.envSize }}",
-            "environmentName": "${{ parameters.environmentName }}",
-            "tags": [
-              { "costCenter": "${{ parameters.costCenter }}" },
-              { "createdBy": "${{ parameters.createdBy }}" }
-            ],
-            "access": {
-              "roles": {
-                "admin": "${{ parameters.adminEmail }}"
-              }
-            },
-            "provider": {
-              "location": "${{ parameters.location }}",
-              "subscription": "${{ parameters.subscription }}",
-              "type": "azure"
-            }
-          }
+        url: ./template-files/json-payload.json
+        values:
+          EnvSize: ${{ parameters.envSize }}
+          environmentName: ${{ parameters.environmentName }}
+          costCenter: ${{ parameters.costCenter }}
+          createdBy: ${{ parameters.createdBy }}
+          adminEmail: ${{ parameters.adminEmail }}
+          location: ${{ parameters.location }}
+          subscription: ${{ parameters.subscription }}
 
     - id: call-api
       name: Call API
@@ -87,7 +76,7 @@ spec:
         url: "${{ parameters.apiUrl }}"
         headers:
           Content-Type: application/json
-        bodyFromFile: ./generated-payload.json
+        bodyFromFile: ./template-files/json-payload.json
 
   output:
     links:
