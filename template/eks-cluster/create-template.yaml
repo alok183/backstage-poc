@@ -12,13 +12,6 @@ spec:
     - title: API Request Details
       required:
         - apiUrl
-        - envSize
-        - environmentName
-        - costCenter
-        - createdBy
-        - adminEmail
-        - location
-        - subscription
       properties:
         apiUrl:
           title: API URL
@@ -28,30 +21,37 @@ spec:
           title: Environment Size
           type: string
           description: The size of the environment
+          default: java-small-env
         environmentName:
           title: Environment Name
           type: string
           description: The name of the environment
+          default: aks-test
         costCenter:
           title: Cost Center
           type: string
           description: The cost center tag
+          default: Delivery
         createdBy:
           title: Created By
           type: string
           description: The creator tag
+          default: Delivery
         adminEmail:
           title: Admin Email
           type: string
           description: Email of the admin user
+          default: testuser1@test.com
         location:
           title: Location
           type: string
           description: Cloud provider location
+          default: us-east-1
         subscription:
           title: Subscription
           type: string
           description: Subscription owner email
+          default: testuser2@test.com
 
   steps:
     - id: generate-json
